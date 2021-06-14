@@ -13,15 +13,17 @@ start = 0
 spectrograms = []
 num_samples = sample_rate // 10
 
+# iterating thru all of the samples obtained from wav file
 while start < len(samples):
+    # obtain the next segment of size num_samples, and increment the index accordingly
     segment = samples[:,0][start:start+num_samples]
     start += num_samples
 
-    # this is the line that creates the spectrogram
+    # create a spectrogram fro the current segment, and append it to the array of spectrograms
     frequencies, times, spectrogram = signal.spectrogram(segment, sample_rate)
     spectrograms.append((frequencies, times, spectrogram))
 
-# prints the spectrogram
+# test code - prints an arbitrary spectrogram
 plt.pcolormesh(spectrograms[50][1], spectrograms[50][0], \
                10*np.log10(spectrograms[50][2]), shading='gouraud')
 plt.ylabel('Frequency [Hz]')
