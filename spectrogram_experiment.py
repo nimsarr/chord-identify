@@ -6,30 +6,34 @@ from scipy.io import wavfile
 from scipy.fft import fftshift
 from pydub import AudioSegment
 
-# This code contains a very simple example for how we want to eventually prepare the
-# training data for our NN
-
 mp3dir = './mp3_files'
 wavdir = './wav_files'
-
 mp3 = '.mp3'
 wav = '.wav'
 
+# check if there is a wav file directory, and make one if there isn't
+if not os.path.isdir(wavdir):
+    os.mkdir(wavdir)
+
 # https://www.geeksforgeeks.org/python-loop-through-files-of-certain-extensions/
+# iterate thru the mp3 files that we have and create parallel wav files where still necessary
 for mp3file in os.listdir(mp3dir):
+    # need to always make sure that we're starting from mp3 files or else errors will happen
     if mp3file.endswith(mp3):
         base_name = mp3file[0 : len(mp3file) - 4]
-        if not os.path.exists(base_name + wav):
+
+        # only create a wav file if there isn't one with that name already
+        if not os.path.exists(wavdir + '/' + base_name + wav):
             sound = AudioSegment.from_mp3(mp3dir + '/' + mp3file)
             sound.export(wavdir + '/' + base_name + wav, format="wav")
             print("created " + base_name + wav)
+    # print a warning when there is a non mp3 file found in the directory - that shouldn't happen in the first place
     else:
         print("warning: non mp3 file found in mp3 directory")
 
-
+# now work with files in wav directory
+# for now this is just working with the first file for the sake of a proof of concept
 wavs = os.listdir(wavdir)
-
-print(wavdir + '/' + wavs[0])
 sample_rate, samples = wavfile.read(wavdir + '/' + wavs[0])
 
 start = 0
@@ -46,9 +50,10 @@ while start < len(samples):
     frequencies, times, spectrogram = signal.spectrogram(segment, sample_rate, nfft=1024)
     spectrograms.append((frequencies, times, spectrogram))
 
+# arbitrary example of creating 2 spectrograms from different parts of the same audio
+# proves that we're obtaining real audio with variation in frequency content
 for ii in range(0, 2):
     plt.subplot(ii + 211)
-    # test code - prints an arbitrary spectrogram
     plt.pcolormesh(spectrograms[50 + ii][1], spectrograms[50 + ii][0], \
                         10*np.log10(spectrograms[50 + ii][2]), shading='gouraud')
     plt.ylabel('Frequency [Hz]')
