@@ -20,12 +20,15 @@ while start < len(samples):
     start += num_samples
 
     # create a spectrogram fro the current segment, and append it to the array of spectrograms
-    frequencies, times, spectrogram = signal.spectrogram(segment, sample_rate)
+    frequencies, times, spectrogram = signal.spectrogram(segment, sample_rate, nfft=1024)
     spectrograms.append((frequencies, times, spectrogram))
 
-# test code - prints an arbitrary spectrogram
-plt.pcolormesh(spectrograms[50][1], spectrograms[50][0], \
-               10*np.log10(spectrograms[50][2]), shading='gouraud')
-plt.ylabel('Frequency [Hz]')
-plt.xlabel('Time [sec]')
+for ii in range(0, 2):
+    plt.subplot(ii + 211)
+    # test code - prints an arbitrary spectrogram
+    plt.pcolormesh(spectrograms[50 + ii][1], spectrograms[50 + ii][0], \
+                        10*np.log10(spectrograms[50 + ii][2]), shading='gouraud')
+    plt.ylabel('Frequency [Hz]')
+    plt.xlabel('Time [sec]')
+
 plt.show()
