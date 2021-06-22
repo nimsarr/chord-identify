@@ -1,4 +1,6 @@
 import os
+import sys
+
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -11,6 +13,7 @@ middir = './midi_files'
 wavdir = './wav_files'
 mid = '.mid'
 wav = '.wav'
+
 
 def midi_to_spectrograms():
     # check if there is a wav file directory, and make one if there isn't
@@ -33,7 +36,13 @@ def midi_to_spectrograms():
             if not os.path.exists(outfile):
                 # sound = AudioSegment.from_mp3(mp3dir + '/' + mp3file)
                 # sound.export(wavdir + '/' + base_name + wav, format="wav")
-                # TODO THIS LINE IS BROKEN WE NEED TO FIGURE OUT MIDI TO AUDIO
+                #
+                # Instructions for fluidsynth:
+                # - install fluidsynth
+                #   - unix: https://github.com/FluidSynth/fluidsynth/wiki/Download
+                #   - Windows: https://github.com/FluidSynth/fluidsynth/releases (download zip and add bin/ to PATH)
+                # - put a soundfont file at ~/.fluidsynth/default_sound_font.sf2
+                #   - https://sites.google.com/site/soundfonts4u/#h.p_biJ8J359lC5W
                 FluidSynth().midi_to_audio(infile, outfile)
                 print("created " + base_name + wav)
         # print a warning when there is a non mp3 file found in the directory - that shouldn't happen in the first place
@@ -61,6 +70,7 @@ def midi_to_spectrograms():
 
     return spectrograms
 
-audio_to_spectrogram()
 
-sys.modules[__name__] = audio_to_spectrogram
+# midi_to_spectrograms()
+
+# sys.modules[__name__] = midi_to_spectrograms
