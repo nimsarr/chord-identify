@@ -37,7 +37,7 @@ def generate_data():
 def train_nn(spectrograms, chords):
     # Below code adapted from https://keras.io/examples/vision/mnist_convnet/
     # Model / data parameters
-    num_classes = 12 # for each possible chord root
+    num_classes = 13 # for each possible chord root pitch class, + no chord
     input_shape = (spectrograms[0].shape[0], spectrograms[0].shape[1], 1)
 
     # Spectrograms are the data, chords are the labels
@@ -58,7 +58,7 @@ def train_nn(spectrograms, chords):
 
     model = keras.Sequential(
         [
-            keras.Input(shape=input_shape),
+            layers.InputLayer(shape=input_shape),
             layers.Conv2D(32, kernel_size=(3, 3), activation="relu"),
             layers.MaxPooling2D(pool_size=(2, 2)),
             layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
@@ -72,7 +72,7 @@ def train_nn(spectrograms, chords):
     model.summary()
 
     model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
-    model.fit(sgrams_train, chords_train, batch_size=128, epochs=15, validation_split=0.1)
+    model.fit(sgrams_train, chords_train, batch_size=128, epochs=100, validation_split=0.1)
 
     score = model.evaluate(sgrams_test, chords_test, verbose=0)
     print("Test loss:", score[0])

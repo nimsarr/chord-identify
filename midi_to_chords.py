@@ -55,9 +55,9 @@ def midi_to_chords(midi_file, time_interval, wav_duration):
         # Check if there are any notes at curr_time
         # (If there aren't, there's no chord)
         if len(sounding_notes) > 0:
-            chord = Chord(sounding_notes).root().pitchClass
+            chord = Chord(sounding_notes).root().pitchClass  # 0-11
         else:
-            chord = 'N'
+            chord = 12  # non-existent pitch class 12 means no chord
         chords.append(chord)
         curr_time += time_interval
 
