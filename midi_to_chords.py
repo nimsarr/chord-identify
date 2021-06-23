@@ -4,69 +4,69 @@ from music21.note import Note
 from music21.chord import Chord
 from functools import reduce
 
-def midi_to_chords(filename):
-    # Get stream from midi file
-    s = converter.parse(filename, quantizePost=False)
 
+def midi_to_chords(midi_file, time_interval, wav_duration):
+    # Get a music stream from midi file
+    s = converter.parse(midi_file, quantizePost=False)
     # Flatten
     s = s.flat
-
     # List of dicts with time in seconds for all elements
-    secMapList = s.secondsMap # THIS TAKES A WHILE
-    secList = []
+    sec_map_list = s.secondsMap  # THIS TAKES A WHILE
 
+    sec_list = []
     # Filter for notes
     # Add tuples to list
-    # (Note startTime, Note endTime, Note)
-    for elementDict in secMapList:
+    # (Note startTime, Note end_time, Note)
+    for elementDict in sec_map_list:
         element = elementDict['element']
         if isinstance(element, Note):
-            secList.append((elementDict['offsetSeconds'], elementDict['endTimeSeconds'], element))
+            sec_list.append((elementDict['offsetSeconds'], elementDict['endTimeSeconds'], element))
 
     # Sort in place (default sort by first item in tuple which is start time)
-    secList.sort()
-
+    sec_list.sort()
     # Get final end time
-    endTime = reduce(lambda x, y: x if x[1] >= y[1] else y, secList)[1]
+    end_time = reduce(lambda x, y: x if x[1] >= y[1] else y, sec_list)[1]
+    print("MIDI duration:", end_time)
 
-    # Time between chord gets
-    interval = 0.5
-
-    currTime = 0
-
-    # List of tuples: (chord, time)
-    chordTimes = []
-
-    # While currTime is before endTime of note that is sounding at the end
-    while currTime <= endTime:
-        soundingNotes = []
-
+    curr_time = 0
+    chords = []
+    # While curr_time is before end_time of note that is sounding at the end
+    # NOTE: temp bugfix, use wav duration instead of midi duration because of
+    #       potential discrepancy which causes different numbers of spectrograms
+    #       and chords to be generated from the same midi file
+    while curr_time + time_interval <= wav_duration:
+        # Get all notes sounding at curr_time
+        sounding_notes = []
         idx = 0
-        noteTime = secList[idx]
-        # Iterate through secList from start
-        # While startTime is at or before currTime
-        while noteTime[0] <= currTime:
-            # Check that endTime is at or after currTime
-            if noteTime[1] >= currTime:
-                soundingNotes.append(noteTime[2])
+        note_time = sec_list[idx]
+        # Iterate through sec_list from start
+        # While startTime is at or before curr_time
+        while note_time[0] <= curr_time:
+            # Check that end_time is at or after curr_time
+            if note_time[1] >= curr_time:
+                sounding_notes.append(note_time[2])
             else:
-                # If endTime is before currTime, we've passed this note,
+                # If end_time is before curr_time, we've passed this note,
                 # so remove from list so we save time later
-                del secList[idx]
+                del sec_list[idx]
             idx += 1
-            noteTime = secList[idx]
+            note_time = sec_list[idx]
 
-        # Check if there are any notes at currTime
+        # Check if there are any notes at curr_time
         # (If there aren't, there's no chord)
-        if len(soundingNotes) > 0:
-            chord = Chord(soundingNotes)
-            chordTimes.append((chord, currTime))
-        currTime += interval
+        if len(sounding_notes) > 0:
+            chord = Chord(sounding_notes).root().pitchClass
+        else:
+            chord = 'N'
+        chords.append(chord)
+        curr_time += time_interval
 
-    print("Num chords: ", len(chordTimes))
-    for chord, time in chordTimes:
-        print(time, ": ", chord.root(), chord.quality)
+    # print("Num chords: ", len(chords))
+    # for chord in chords:
+    #     print(chord)
 
-    return chordTimes
+    return chords
 
-sys.modules[__name__] = midi_to_chords
+# midi_to_chords('midi_files/1d9d16a9da90c090809c153754823c2b.mid', 0.5)
+
+# sys.modules[__name__] = midi_to_chords
