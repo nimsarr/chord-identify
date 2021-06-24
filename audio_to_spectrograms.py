@@ -50,7 +50,7 @@ def midi_to_spectrograms(midi_file, time_interval):
         spectrograms.append(spectrogram)
 
     # Remove temp wav file
-    # os.remove(wav_file)
+    os.remove(wav_file)
 
     return spectrograms, wav_duration
 
