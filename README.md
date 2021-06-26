@@ -11,9 +11,14 @@ Requires FluidSynth to be installed (required by python package midi2audio):
   - We used https://sites.google.com/site/soundfonts4u/#h.p_biJ8J359lC5W
 
 Expects the following file placement:
+
+```
 <parent>/
 <parent>/lmd-aligned/
 <parent>/chord-identify/
+```
+
+---
 
 Written for the final project of Northeastern's CS4100 Artificial Intelligence course, Summer I 2021.
 
