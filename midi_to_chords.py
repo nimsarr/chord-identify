@@ -1,4 +1,3 @@
-import sys
 from music21 import converter
 from music21.note import Note
 from music21.chord import Chord
@@ -11,7 +10,7 @@ def midi_to_chords(midi_file, time_interval, wav_duration):
     # Flatten
     s = s.flat
     # List of dicts with time in seconds for all elements
-    sec_map_list = s.secondsMap  # THIS TAKES A WHILE
+    sec_map_list = s.secondsMap  # THIS IS WHAT TAKES THE MOST TIME BY FAR
 
     sec_list = []
     # Filter for notes

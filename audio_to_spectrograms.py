@@ -1,13 +1,8 @@
 import os
 from os import path
-import sys
 
-import numpy as np
-import tensorflow as tf
-import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.io import wavfile
-from scipy.fft import fftshift
 from midi2audio import FluidSynth
 
 middir = './midi_files'

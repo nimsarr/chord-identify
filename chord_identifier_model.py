@@ -1,48 +1,16 @@
-from midi_to_chords import midi_to_chords
-from audio_to_spectrograms import midi_to_spectrograms
-
-import glob
 import numpy as np
 from sklearn.model_selection import train_test_split
 from tensorflow import keras
 from tensorflow.keras import layers
 
-midi_dataset_filepath = '../lmd_aligned/'
 # 0 = C, 2 = D, ..., 11 = B, 12 = N
 # N means no chord because no notes
 chord_labels = ['C', 'C#/D-', 'D', 'D#/E-', 'E', 'F', 'F#/G-', 'G', 'G#/A-', 'A', 'A#/B-', 'B', 'N']
-# Time in seconds for each segment of audio to test
-time_interval = 0.5
+epochs = 50
 
 
-def generate_data():
-    max_files = 1000
-    start_idx = 200
-    idx = 0
-    spectrograms = []
-    chords = []
-    for filepath in glob.iglob(midi_dataset_filepath + '**/*.mid', recursive=True):
-        if idx < start_idx:
-            idx += 1
-            continue
-        if idx >= max_files:
-            break
-        print("---------------")
-        print("Processing midi file", str(idx) + ":")
-        try:
-            file_sgrams, wav_duration = midi_to_spectrograms(filepath, time_interval)
-            file_chords = midi_to_chords(filepath, time_interval, wav_duration)
-        except Exception as e:
-            print("ERROR, SKIPPING:", e, e.__cause__, e.__annotations__)
-            continue
-        print("Length of sgrams, chords:", len(file_sgrams), len(file_chords))
-        spectrograms.extend(file_sgrams)
-        chords.extend(file_chords)
-        idx += 1
-
-    return np.array(spectrograms), np.array(chords)
-
-
+# Use the data generated and saved to the npy files in this directory
+# Train a convolutional neural network for 50 epochs on this data and print the test results
 def train_nn(spectrograms, chords):
     # Below code adapted from https://keras.io/examples/vision/mnist_convnet/
     # Model / data parameters
@@ -68,9 +36,9 @@ def train_nn(spectrograms, chords):
     model = keras.Sequential(
         [
             layers.InputLayer(input_shape=input_shape),
-            layers.Conv2D(32, kernel_size=(3, 3), activation="relu"),
+            layers.Conv2D(16, kernel_size=(3, 3), activation="relu"),
             layers.MaxPooling2D(pool_size=(2, 2)),
-            layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
+            layers.Conv2D(8, kernel_size=(3, 3), activation="relu"),
             layers.MaxPooling2D(pool_size=(2, 2)),
             layers.Flatten(),
             layers.Dropout(0.5),
@@ -81,16 +49,13 @@ def train_nn(spectrograms, chords):
     model.summary()
 
     model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
-    model.fit(sgrams_train, chords_train, batch_size=64, epochs=100, validation_split=0.1)
+    model.fit(sgrams_train, chords_train, batch_size=16, epochs=epochs, validation_split=0.1)
 
     score = model.evaluate(sgrams_test, chords_test, verbose=0)
     print("Test loss:", score[0])
     print("Test accuracy:", score[1])
 
 
-spectrograms, chords = generate_data()
-np.save('spectrograms1k1.npy', spectrograms)
-np.save('chords1k1.npy', chords)
-# spectrograms = np.load('spectrograms.npy')
-# chords = np.load('chords.npy')
+spectrograms = np.load('spectrograms.npy')
+chords = np.load('chords.npy')
 train_nn(spectrograms, chords)
